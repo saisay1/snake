@@ -22,10 +22,6 @@ local State = {
     DiamondEnabled = true,
     EmeraldEnabled = true,
 
-    FlowerEnabled = true,
-    MushroomsEnabled = true,
-    ThornsEnabled = true,
-
     BeesMode = "Highlight",
     BedMode = "Highlight",
     UrnMode = "Highlight",
@@ -35,10 +31,6 @@ local State = {
     IronMode = "Box",
     DiamondMode = "Box",
     EmeraldMode = "Box",
-
-    FlowerMode = "Box",
-    MushroomsMode = "Box",
-    ThornsMode = "Box",
 
     PlayerFillTrans = 0.7,
     PartFillTrans = 0.4,
@@ -53,9 +45,6 @@ local CustomTargets = {
     {Name = "iron",    Color = Color3.fromRGB(200, 200, 200), Tab = "RESOURCES",    Text = "Iron (Drops)",    StateKey = "IronEnabled",    ModeKey = "IronMode"},
     {Name = "diamond", Color = Color3.fromRGB(0, 240, 255),   Tab = "RESOURCES",    Text = "Diamond (Drops)", StateKey = "DiamondEnabled", ModeKey = "DiamondMode"},
     {Name = "emerald", Color = Color3.fromRGB(0, 255, 70),    Tab = "RESOURCES",    Text = "Emerald (Drops)", StateKey = "EmeraldEnabled", ModeKey = "EmeraldMode"},
-    {Name = "flower",   Color = Color3.fromRGB(255, 180, 220), Tab = "ALCHEMIST",    Text = "Show Flowers",    StateKey = "FlowerEnabled",    ModeKey = "FlowerMode"},
-    {Name = "mushroom", Color = Color3.fromRGB(210, 140, 80),  Tab = "ALCHEMIST",    Text = "Show Mushrooms",  StateKey = "MushroomsEnabled", ModeKey = "MushroomsMode"},
-    {Name = "thorn",    Color = Color3.fromRGB(100, 200, 80),  Tab = "ALCHEMIST",    Text = "Show Thorns",     StateKey = "ThornsEnabled",    ModeKey = "ThornsMode"},
 }
 
 -- ================= ХРАНИЛИЩЕ ESP =================
@@ -501,7 +490,6 @@ addCircle(Color3.fromRGB(200, 0, 0),   "🛏", "Beds")
 addCircle(Color3.fromRGB(255, 200, 0), "🐝", "Beekeeper")
 addCircle(Color3.fromRGB(0, 180, 80),  "📦", "Resources")
 addCircle(Color3.fromRGB(50, 160, 50), "🍉", "Farmer Fruit")
-addCircle(Color3.fromRGB(210, 180, 140), "🍄", "Alchemist")
 SwitchTab("Player")
 
 -- ================= ДРАГ =================
@@ -561,4 +549,17 @@ task.spawn(function()
         end
         for part, esp in pairs(objectESPCache) do
             pcall(function()
-                if not esp or not esp.Parent or not part:IsDescendantOf(work
+                if not esp or not esp.Parent or not part:IsDescendantOf(workspace) then
+                    removeObjectESP(part)
+                end
+            end)
+        end
+        for p, cache in pairs(playerESPCache) do
+            pcall(function()
+                if not p or not p.Parent then
+                    removePlayerESP(p)
+                end
+            end)
+        end
+    end
+end)
