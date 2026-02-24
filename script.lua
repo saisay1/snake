@@ -11,19 +11,19 @@ local State = {
     ShowNames = true,
     ShowHealth = true,
 
-    BeesEnabled = true,
-    BeehiveEnabled = true,
-    UrnEnabled = true,
-    BedEnabled = true,
-    MelonEnabled = true,
+    BeesEnabled = false,
+    BeehiveEnabled = false,
+    UrnEnabled = false,
+    BedEnabled = false,
+    MelonEnabled = false,
 
-    IronEnabled = true,
-    DiamondEnabled = true,
-    EmeraldEnabled = true,
+    IronEnabled = false,
+    DiamondEnabled = false,
+    EmeraldEnabled = false,
 
-    FlowerEnabled = true,
-    MushroomsEnabled = true,
-    ThornsEnabled = true,
+    FlowerEnabled = false,
+    MushroomsEnabled = false,
+    ThornsEnabled = false,
 
     BeesMode = "Highlight",
     BedMode = "Highlight",
@@ -35,9 +35,9 @@ local State = {
     DiamondMode = "Box",
     EmeraldMode = "Box",
 
-    FlowerMode = "Box",
-    MushroomsMode = "Box",
-    ThornsMode = "Box",
+    FlowerMode = "Highlight",
+    MushroomsMode = "Highlight",
+    ThornsMode = "Highlight",
 
     PlayerFillTrans = 0.7,
     PartFillTrans = 0.4,
@@ -199,7 +199,7 @@ local function applyObjectESP(part, targetData)
         esp.Adornee = part
         esp.FillColor = targetData.Color
         esp.OutlineColor = Color3.new(0, 0, 0)
-        esp.OutlineTransparency = 0
+        esp.OutlineTransparency = targetData.Tab == "ALCHEMIST" and 1 or 0
         esp.FillTransparency = State.PartFillTrans
     end
 
