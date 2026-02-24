@@ -199,7 +199,7 @@ local function applyObjectESP(part, targetData)
         esp.Adornee = part
         esp.FillColor = targetData.Color
         esp.OutlineColor = Color3.new(0, 0, 0)
-        esp.OutlineTransparency = targetData.Tab == "ALCHEMIST" and 1 or 0
+        esp.OutlineTransparency = (targetData.Tab == "ALCHEMIST" or targetData.Tab == "BEEKEEPER") and 1 or 0
         esp.FillTransparency = State.PartFillTrans
     end
 
