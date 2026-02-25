@@ -103,7 +103,6 @@ local function applyPlayerESP(p)
         bb = Instance.new("BillboardGui", head)
         bb.Name = "SaiPlayerTag"
         bb.AlwaysOnTop = true
-        bb.Size = UDim2.new(0, 200, 0, 40)
         bb.StudsOffset = Vector3.new(0, 3, 0)
 
         local nameLabel = Instance.new("TextLabel", bb)
@@ -128,11 +127,10 @@ local function applyPlayerESP(p)
     end
 
     bb.Enabled = State.PlayersEnabled
-    bb.StudsOffset = Vector3.new(0, 3, 0)
-    bb.AlwaysOnTop = true
 
+    -- Egor режим: ограничение дистанции показа ников
     if State.NamesMode == "Egor" then
-        bb.Size = UDim2.new(0, 100, 0, 28)
+        bb.Size = UDim2.new(0, 200, 0, 40)
         bb.MaxDistance = 190
     else
         bb.Size = UDim2.new(0, 200, 0, 40)
@@ -312,30 +310,34 @@ local function createMenuBtn(text, pos)
     return btn
 end
 
-local BoxBtn = createMenuBtn("BOX MODE", UDim2.new(0, 5, 0, 6))
-local HLBtn  = createMenuBtn("HIGHLIGHT", UDim2.new(0, 5, 0, 37))
+local TopBtn = createMenuBtn("BOX MODE", UDim2.new(0, 5, 0, 6))
+local BotBtn = createMenuBtn("HIGHLIGHT", UDim2.new(0, 5, 0, 37))
 local currentSetKey = nil
-local currentSetType = "esp" -- "esp" или "egor"
+local currentSetType = "esp"
 
 local function onModeChange()
     SettingsPanel.Visible = false
-    -- если меняем EgorMode — просто обновляем игроков
-    if currentSetType == "egor" then return end
     refreshObjects()
 end
 
-BoxBtn.MouseButton1Click:Connect(function()
-    if currentSetKey and currentSetType == "esp" then
-        State[currentSetKey] = "Box"; onModeChange()
-    elseif currentSetKey and currentSetType == "egor" then
-        State[currentSetKey] = "Default"; SettingsPanel.Visible = false
+TopBtn.MouseButton1Click:Connect(function()
+    if not currentSetKey then return end
+    if currentSetType == "names" then
+        State[currentSetKey] = "Default"
+        SettingsPanel.Visible = false
+    else
+        State[currentSetKey] = "Box"
+        onModeChange()
     end
 end)
-HLBtn.MouseButton1Click:Connect(function()
-    if currentSetKey and currentSetType == "esp" then
-        State[currentSetKey] = "Highlight"; onModeChange()
-    elseif currentSetKey and currentSetType == "egor" then
-        State[currentSetKey] = "Egor"; SettingsPanel.Visible = false
+BotBtn.MouseButton1Click:Connect(function()
+    if not currentSetKey then return end
+    if currentSetType == "names" then
+        State[currentSetKey] = "Egor"
+        SettingsPanel.Visible = false
+    else
+        State[currentSetKey] = "Highlight"
+        onModeChange()
     end
 end)
 
@@ -390,13 +392,14 @@ local function addToggle(text, stateKey, modeKey)
         Instance.new("UICorner", opt)
         opt.MouseButton1Click:Connect(function()
             currentSetKey = modeKey
-            currentSetType = (modeKey == "NamesMode") and "egor" or "esp"
-            if currentSetType == "egor" then
-                BoxBtn.Text = "DEFAULT"
-                HLBtn.Text = "EGOR"
+            if modeKey == "NamesMode" then
+                currentSetType = "names"
+                TopBtn.Text = "DEFAULT"
+                BotBtn.Text = "EGOR"
             else
-                BoxBtn.Text = "BOX MODE"
-                HLBtn.Text = "HIGHLIGHT"
+                currentSetType = "esp"
+                TopBtn.Text = "BOX MODE"
+                BotBtn.Text = "HIGHLIGHT"
             end
             SettingsPanel.Position = UDim2.new(0, opt.AbsolutePosition.X - 115, 0, opt.AbsolutePosition.Y)
             SettingsPanel.Visible = not SettingsPanel.Visible
@@ -458,12 +461,12 @@ local function addCircle(color, emoji, tabName)
     btn.MouseButton1Click:Connect(function() SwitchTab(tabName) end)
 end
 
-addCircle(Color3.fromRGB(200, 100, 0),  "👤", "Player")
-addCircle(Color3.fromRGB(200, 0, 0),    "🛏️", "Beds")
-addCircle(Color3.fromRGB(255, 200, 0),  "🐝", "Beekeeper")
-addCircle(Color3.fromRGB(0, 180, 80),   "📦", "Resources")
-addCircle(Color3.fromRGB(50, 160, 50),  "🍉", "Farmer Fruit")
-addCircle(Color3.fromRGB(210, 180, 140),"🍄", "Alchemist")
+addCircle(Color3.fromRGB(200, 100, 0),   "👤", "Player")
+addCircle(Color3.fromRGB(200, 0, 0),     "🛏️", "Beds")
+addCircle(Color3.fromRGB(255, 200, 0),   "🐝", "Beekeeper")
+addCircle(Color3.fromRGB(0, 180, 80),    "📦", "Resources")
+addCircle(Color3.fromRGB(50, 160, 50),   "🍉", "Farmer Fruit")
+addCircle(Color3.fromRGB(210, 180, 140), "🍄", "Alchemist")
 SwitchTab("Player")
 
 -- ================= ДРАГ =================
@@ -495,4 +498,13 @@ Players.PlayerAdded:Connect(function(p)
     p.CharacterAdded:Connect(function()
         task.wait(0.5)
         pcall(applyPlayerESP, p)
-    en
+    end)
+end)
+Players.PlayerRemoving:Connect(removePlayerESP)
+
+initialScan()
+watchNewDescendants()
+
+task.spawn(function()
+    while task.wait(0.5) do
+        for _, p in ipairs(Players:GetPlayers
