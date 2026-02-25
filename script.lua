@@ -428,12 +428,12 @@ local function addCircle(color, emoji, tabName)
     btn.MouseButton1Click:Connect(function() SwitchTab(tabName) end)
 end
 
-addCircle(Color3.fromRGB(200, 100, 0),   "👤", "Player")
-addCircle(Color3.fromRGB(200, 0, 0),     "🛏️", "Beds")
-addCircle(Color3.fromRGB(255, 200, 0),   "🐝", "Beekeeper")
-addCircle(Color3.fromRGB(0, 180, 80),    "📦", "Resources")
-addCircle(Color3.fromRGB(50, 160, 50),   "🍉", "Farmer Fruit")
-addCircle(Color3.fromRGB(210, 180, 140), "🍄", "Alchemist")
+addCircle(Color3.fromRGB(200, 100, 0),  "👤", "Player")
+addCircle(Color3.fromRGB(200, 0, 0),    "🛏️", "Beds")
+addCircle(Color3.fromRGB(255, 200, 0),  "🐝", "Beekeeper")
+addCircle(Color3.fromRGB(0, 180, 80),   "📦", "Resources")
+addCircle(Color3.fromRGB(50, 160, 50),  "🍉", "Farmer Fruit")
+addCircle(Color3.fromRGB(210, 180, 140),"🍄", "Alchemist")
 SwitchTab("Player")
 
 -- ================= ДРАГ =================
