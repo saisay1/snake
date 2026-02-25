@@ -128,16 +128,15 @@ local function applyPlayerESP(p)
     end
 
     bb.Enabled = State.PlayersEnabled
+    bb.StudsOffset = Vector3.new(0, 3, 0)
+    bb.AlwaysOnTop = true
 
-    -- Egor режим: фиксированный размер (не масштабируется с расстоянием)
     if State.NamesMode == "Egor" then
-        bb.Size = UDim2.new(0, 120, 0, 30)
-        bb.StudsOffsetWorldSpace = Vector3.new(0, 3, 0)
-        bb.StudsOffset = Vector3.new(0, 0, 0)
+        bb.Size = UDim2.new(0, 100, 0, 28)
+        bb.MaxDistance = 190
     else
         bb.Size = UDim2.new(0, 200, 0, 40)
-        bb.StudsOffsetWorldSpace = Vector3.new(0, 0, 0)
-        bb.StudsOffset = Vector3.new(0, 3, 0)
+        bb.MaxDistance = 0
     end
 
     local nameLabel = bb:FindFirstChild("NameLabel")
@@ -490,4 +489,10 @@ end
 MakeDraggable(MainFrame, TopBar)
 MakeDraggable(OpenBtn, OpenBtn)
 
--- ================= ЗАПУСК =======
+-- ================= ЗАПУСК =================
+
+Players.PlayerAdded:Connect(function(p)
+    p.CharacterAdded:Connect(function()
+        task.wait(0.5)
+        pcall(applyPlayerESP, p)
+    en
