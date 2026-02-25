@@ -10,6 +10,7 @@ local State = {
     PlayersEnabled = true,
     ShowNames = true,
     ShowHealth = true,
+    NamesMode = "Default",
 
     BeesEnabled = true,
     BeehiveEnabled = true,
@@ -127,6 +128,17 @@ local function applyPlayerESP(p)
     end
 
     bb.Enabled = State.PlayersEnabled
+
+    -- Egor режим: фиксированный размер (не масштабируется с расстоянием)
+    if State.NamesMode == "Egor" then
+        bb.Size = UDim2.new(0, 120, 0, 30)
+        bb.StudsOffsetWorldSpace = Vector3.new(0, 3, 0)
+        bb.StudsOffset = Vector3.new(0, 0, 0)
+    else
+        bb.Size = UDim2.new(0, 200, 0, 40)
+        bb.StudsOffsetWorldSpace = Vector3.new(0, 0, 0)
+        bb.StudsOffset = Vector3.new(0, 3, 0)
+    end
 
     local nameLabel = bb:FindFirstChild("NameLabel")
     local healthBack = bb:FindFirstChild("HealthBack")
@@ -304,17 +316,28 @@ end
 local BoxBtn = createMenuBtn("BOX MODE", UDim2.new(0, 5, 0, 6))
 local HLBtn  = createMenuBtn("HIGHLIGHT", UDim2.new(0, 5, 0, 37))
 local currentSetKey = nil
+local currentSetType = "esp" -- "esp" или "egor"
 
 local function onModeChange()
     SettingsPanel.Visible = false
+    -- если меняем EgorMode — просто обновляем игроков
+    if currentSetType == "egor" then return end
     refreshObjects()
 end
 
 BoxBtn.MouseButton1Click:Connect(function()
-    if currentSetKey then State[currentSetKey] = "Box"; onModeChange() end
+    if currentSetKey and currentSetType == "esp" then
+        State[currentSetKey] = "Box"; onModeChange()
+    elseif currentSetKey and currentSetType == "egor" then
+        State[currentSetKey] = "Default"; SettingsPanel.Visible = false
+    end
 end)
 HLBtn.MouseButton1Click:Connect(function()
-    if currentSetKey then State[currentSetKey] = "Highlight"; onModeChange() end
+    if currentSetKey and currentSetType == "esp" then
+        State[currentSetKey] = "Highlight"; onModeChange()
+    elseif currentSetKey and currentSetType == "egor" then
+        State[currentSetKey] = "Egor"; SettingsPanel.Visible = false
+    end
 end)
 
 local TopBar = Instance.new("Frame", MainFrame)
@@ -368,6 +391,14 @@ local function addToggle(text, stateKey, modeKey)
         Instance.new("UICorner", opt)
         opt.MouseButton1Click:Connect(function()
             currentSetKey = modeKey
+            currentSetType = (modeKey == "NamesMode") and "egor" or "esp"
+            if currentSetType == "egor" then
+                BoxBtn.Text = "DEFAULT"
+                HLBtn.Text = "EGOR"
+            else
+                BoxBtn.Text = "BOX MODE"
+                HLBtn.Text = "HIGHLIGHT"
+            end
             SettingsPanel.Position = UDim2.new(0, opt.AbsolutePosition.X - 115, 0, opt.AbsolutePosition.Y)
             SettingsPanel.Visible = not SettingsPanel.Visible
         end)
@@ -409,7 +440,7 @@ local function SwitchTab(name)
     end
     if name == "Player" then
         addToggle("Enable ESP", "PlayersEnabled")
-        addToggle("Names & Distance", "ShowNames")
+        addToggle("Names & Distance", "ShowNames", "NamesMode")
         addToggle("Health Bar", "ShowHealth")
     else
         for _, t in pairs(CustomTargets) do
@@ -459,35 +490,4 @@ end
 MakeDraggable(MainFrame, TopBar)
 MakeDraggable(OpenBtn, OpenBtn)
 
--- ================= ЗАПУСК =================
-
-Players.PlayerAdded:Connect(function(p)
-    p.CharacterAdded:Connect(function()
-        task.wait(0.5)
-        pcall(applyPlayerESP, p)
-    end)
-end)
-Players.PlayerRemoving:Connect(removePlayerESP)
-
-initialScan()
-watchNewDescendants()
-
-task.spawn(function()
-    while task.wait(0.5) do
-        for _, p in ipairs(Players:GetPlayers()) do
-            if p ~= LocalPlayer and p.Character then
-                pcall(function() applyPlayerESP(p) end)
-            end
-        end
-        for part, esp in pairs(objectESPCache) do
-            if not esp or not esp.Parent or not part:IsDescendantOf(workspace) then
-                removeObjectESP(part)
-            end
-        end
-        for p, cache in pairs(playerESPCache) do
-            if not p or not p.Parent then
-                removePlayerESP(p)
-            end
-        end
-    end
-end)
+-- ================= ЗАПУСК =======
