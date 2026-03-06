@@ -26,6 +26,7 @@ local State = {
     ThornsEnabled = true,
 
     EggEnabled = true,
+    MaskEnabled = true,
 
     GravestoneEnabled = true,
 
@@ -44,6 +45,7 @@ local State = {
     ThornsMode = "Highlight",
 
     EggMode = "Highlight",
+    MaskMode = "Highlight",
 
     GravestoneMode = "Highlight",
 
@@ -65,6 +67,7 @@ local CustomTargets = {
     {Name = "thorn",      Color = Color3.fromRGB(100, 200, 80),  Tab = "ALCHEMIST",    Text = "Show Thorns",     StateKey = "ThornsEnabled",    ModeKey = "ThornsMode"},
     {Name = "gravestone",       Color = Color3.fromRGB(180, 180, 180), Tab = "CRYPT",     Text = "Show Gravestone", StateKey = "GravestoneEnabled", ModeKey = "GravestoneMode"},
     {Name = "chicken_egg_block",Color = Color3.fromRGB(255, 220, 100), Tab = "EGG",       Text = "Show Egg",        StateKey = "EggEnabled",        ModeKey = "EggMode"},
+    {Name = "2",                Color = Color3.fromRGB(180, 100, 255), Tab = "MASK",      Text = "Show Mask",       StateKey = "MaskEnabled",       ModeKey = "MaskMode"},
 }
 
 local ESP_FOLDER = workspace:FindFirstChild("Global_ESP_Storage") or Instance.new("Folder", workspace)
@@ -345,7 +348,7 @@ CloseBtn.MouseButton1Click:Connect(function() MainFrame.Visible = false; Setting
 local TabScroll = Instance.new("ScrollingFrame", MainFrame)
 TabScroll.Position = UDim2.new(0, 10, 0, 45); TabScroll.Size = UDim2.new(1, -20, 0, 55)
 TabScroll.BackgroundTransparency = 1; TabScroll.BorderSizePixel = 0
-TabScroll.CanvasSize = UDim2.new(2.6, 0, 0, 0); TabScroll.ScrollBarThickness = 0
+TabScroll.CanvasSize = UDim2.new(3.0, 0, 0, 0); TabScroll.ScrollBarThickness = 0
 local tl = Instance.new("UIListLayout", TabScroll)
 tl.FillDirection = Enum.FillDirection.Horizontal; tl.Padding = UDim.new(0, 12); tl.VerticalAlignment = Enum.VerticalAlignment.Center
 
@@ -446,6 +449,7 @@ addCircle(Color3.fromRGB(50, 160, 50),  "🍉", "Farmer Fruit")
 addCircle(Color3.fromRGB(210, 180, 140),"🍄", "Alchemist")
 addCircle(Color3.fromRGB(139, 90, 43),  "🥚", "Egg")
 addCircle(Color3.fromRGB(255, 255, 255),"💀", "Crypt")
+addCircle(Color3.fromRGB(128, 0, 200),  "🎭", "Mask")
 SwitchTab("Player")
 
 -- ================= ДРАГ =================
