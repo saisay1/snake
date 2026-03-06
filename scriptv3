@@ -45,7 +45,7 @@ local State = {
     ThornsMode = "Highlight",
 
     EggMode = "Highlight",
-    MaskMode = "Highlight",
+    MaskMode = "Box",
 
     GravestoneMode = "Highlight",
 
@@ -67,7 +67,7 @@ local CustomTargets = {
     {Name = "thorn",      Color = Color3.fromRGB(100, 200, 80),  Tab = "ALCHEMIST",    Text = "Show Thorns",     StateKey = "ThornsEnabled",    ModeKey = "ThornsMode"},
     {Name = "gravestone",       Color = Color3.fromRGB(180, 180, 180), Tab = "CRYPT",     Text = "Show Gravestone", StateKey = "GravestoneEnabled", ModeKey = "GravestoneMode"},
     {Name = "chicken_egg_block",Color = Color3.fromRGB(255, 220, 100), Tab = "EGG",       Text = "Show Egg",        StateKey = "EggEnabled",        ModeKey = "EggMode"},
-    {Name = "2",                Color = Color3.fromRGB(180, 100, 255), Tab = "MASK",      Text = "Show Mask",       StateKey = "MaskEnabled",       ModeKey = "MaskMode"},
+    {Name = "2",                Color = Color3.fromRGB(180, 100, 255), Tab = "DEATH ADDER", Text = "Show Crystal",    StateKey = "MaskEnabled",       ModeKey = "MaskMode"},
 }
 
 local ESP_FOLDER = workspace:FindFirstChild("Global_ESP_Storage") or Instance.new("Folder", workspace)
@@ -449,7 +449,7 @@ addCircle(Color3.fromRGB(50, 160, 50),  "🍉", "Farmer Fruit")
 addCircle(Color3.fromRGB(210, 180, 140),"🍄", "Alchemist")
 addCircle(Color3.fromRGB(139, 90, 43),  "🥚", "Egg")
 addCircle(Color3.fromRGB(255, 255, 255),"💀", "Crypt")
-addCircle(Color3.fromRGB(128, 0, 200),  "🎭", "Mask")
+addCircle(Color3.fromRGB(128, 0, 200),  "🎭", "Death Adder")
 SwitchTab("Player")
 
 -- ================= ДРАГ =================
