@@ -110,7 +110,6 @@ local function applyPlayerESP(p)
     local bb
     local needNew = true
     if cache and cache.bb and cache.bb.Parent == head then
-        -- пересоздаём если режим изменился
         local prevMode = cache.namesMode or "Default"
         if prevMode == State.NamesMode then
             needNew = false
@@ -125,6 +124,14 @@ local function applyPlayerESP(p)
         bb.AlwaysOnTop = true
         bb.StudsOffset = Vector3.new(0, 3, 0)
 
+        if State.NamesMode == "Egor" then
+            -- мировое пространство: маленький размер в studs = масштабируется
+            bb.Size = UDim2.new(0, 0, 0, 0)
+            bb.StudsOffset = Vector3.new(0, 0, 0)
+        else
+            bb.Size = UDim2.new(0, 200, 0, 40)
+        end
+
         local nameLabel = Instance.new("TextLabel", bb)
         nameLabel.Name = "NameLabel"
         nameLabel.BackgroundTransparency = 1
@@ -132,6 +139,12 @@ local function applyPlayerESP(p)
         nameLabel.Font = Enum.Font.GothamBold
         nameLabel.TextSize = 14
         nameLabel.RichText = true
+
+        if State.NamesMode == "Egor" then
+            nameLabel.TextScaled = true
+            nameLabel.Size = UDim2.new(1, 0, 1, 0)
+            nameLabel.TextStrokeTransparency = 1
+        end
 
         local healthBack = Instance.new("Frame", bb)
         healthBack.Name = "HealthBack"
@@ -147,14 +160,13 @@ local function applyPlayerESP(p)
 
     bb.Enabled = State.PlayersEnabled
 
-    -- режим ника
     if State.NamesMode == "Egor" then
-        bb.Size = UDim2.new(10, 0, 3, 0)
-        bb.StudsOffset = Vector3.new(0, 0, 0)
-        bb.StudsOffsetWorldSpace = Vector3.new(0, 3, 0)
+        bb.Size = UDim2.new(0, 0, 0, 0)
+        bb.SizeOffset = Vector2.new(6, 1.5)
+        bb.StudsOffset = Vector3.new(0, 3, 0)
     else
+        bb.SizeOffset = Vector2.new(0, 0)
         bb.Size = UDim2.new(0, 200, 0, 40)
-        bb.StudsOffsetWorldSpace = Vector3.new(0, 0, 0)
         bb.StudsOffset = Vector3.new(0, 3, 0)
     end
 
