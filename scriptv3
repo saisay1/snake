@@ -63,7 +63,8 @@ local CustomTargets = {
     {Name = "flower",   Color = Color3.fromRGB(255, 180, 220), Tab = "ALCHEMIST",    Text = "Show Flowers",    StateKey = "FlowerEnabled",    ModeKey = "FlowerMode"},
     {Name = "mushroom", Color = Color3.fromRGB(210, 140, 80),  Tab = "ALCHEMIST",    Text = "Show Mushrooms",  StateKey = "MushroomsEnabled", ModeKey = "MushroomsMode"},
     {Name = "thorn",      Color = Color3.fromRGB(100, 200, 80),  Tab = "ALCHEMIST",    Text = "Show Thorns",     StateKey = "ThornsEnabled",    ModeKey = "ThornsMode"},
-    {Name = "gravestone", Color = Color3.fromRGB(180, 180, 180), Tab = "CRYPT",        Text = "Show Gravestone", StateKey = "GravestoneEnabled", ModeKey = "GravestoneMode"},
+    {Name = "gravestone",       Color = Color3.fromRGB(180, 180, 180), Tab = "CRYPT",     Text = "Show Gravestone", StateKey = "GravestoneEnabled", ModeKey = "GravestoneMode"},
+    {Name = "chicken_egg_block",Color = Color3.fromRGB(255, 220, 100), Tab = "EGG",       Text = "Show Egg",        StateKey = "EggEnabled",        ModeKey = "EggMode"},
 }
 
 local ESP_FOLDER = workspace:FindFirstChild("Global_ESP_Storage") or Instance.new("Folder", workspace)
@@ -273,40 +274,6 @@ local function refreshObjects()
     initialScan()
 end
 
--- ================= ESP ЯЙЦА =================
-
-local eggESP = nil
-
-local function applyEggESP()
-    if eggESP and eggESP.Parent then eggESP:Destroy() end
-    eggESP = nil
-    if not State.EggEnabled then return end
-    local ok, part = pcall(function()
-        return workspace.EggEntity.Part
-    end)
-    if not ok or not part then return end
-    local esp = Instance.new("Highlight", ESP_FOLDER)
-    esp.Adornee = part
-    esp.FillColor = Color3.fromRGB(255, 220, 100)
-    esp.OutlineColor = Color3.new(0, 0, 0)
-    esp.OutlineTransparency = 0
-    esp.FillTransparency = 0.4
-    eggESP = esp
-end
-
-workspace.DescendantAdded:Connect(function(obj)
-    if obj.Name == "EggEntity" or (obj.Parent and obj.Parent.Name == "EggEntity" and obj.Name == "Part") then
-        task.wait(0.1)
-        applyEggESP()
-    end
-end)
-workspace.DescendantRemoving:Connect(function(obj)
-    if obj.Name == "EggEntity" or obj.Name == "Part" and obj.Parent and obj.Parent.Name == "EggEntity" then
-        if eggESP and eggESP.Parent then eggESP:Destroy() end
-        eggESP = nil
-    end
-end)
-
 -- ================= ИНТЕРФЕЙС (UI) =================
 
 if ParentGui:FindFirstChild("SaiBedwarsEspUni") then ParentGui.SaiBedwarsEspUni:Destroy() end
@@ -439,11 +406,7 @@ local function addToggle(text, stateKey, modeKey)
     bg.MouseButton1Click:Connect(function()
         State[stateKey] = not State[stateKey]
         update()
-        if stateKey == "EggEnabled" then
-            applyEggESP()
-        else
-            refreshObjects()
-        end
+        refreshObjects()
     end)
     update()
 end
@@ -463,9 +426,6 @@ local function SwitchTab(name)
             if t.Tab == name:upper() then
                 addToggle(t.Text, t.StateKey, t.ModeKey)
             end
-        end
-        if name:upper() == "EGG" then
-            addToggle("Show Egg", "EggEnabled", "EggMode")
         end
     end
 end
@@ -523,7 +483,6 @@ Players.PlayerRemoving:Connect(removePlayerESP)
 
 initialScan()
 watchNewDescendants()
-applyEggESP()
 
 task.spawn(function()
     while task.wait(0.5) do
@@ -541,10 +500,6 @@ task.spawn(function()
             if not p or not p.Parent then
                 removePlayerESP(p)
             end
-        end
-        -- обновляем яйцо если esp пропал
-        if State.EggEnabled and (not eggESP or not eggESP.Parent) then
-            applyEggESP()
         end
     end
 end)
