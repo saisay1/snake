@@ -108,13 +108,21 @@ local function applyPlayerESP(p)
     hl.FillTransparency = State.PlayerFillTrans
 
     local bb
+    local needNew = true
     if cache and cache.bb and cache.bb.Parent == head then
-        bb = cache.bb
-    else
+        -- пересоздаём если режим изменился
+        local prevMode = cache.namesMode or "Default"
+        if prevMode == State.NamesMode then
+            needNew = false
+            bb = cache.bb
+        else
+            cache.bb:Destroy()
+        end
+    end
+    if needNew then
         bb = Instance.new("BillboardGui", head)
         bb.Name = "SaiPlayerTag"
         bb.AlwaysOnTop = true
-        bb.Size = UDim2.new(0, 200, 0, 40)
         bb.StudsOffset = Vector3.new(0, 3, 0)
 
         local nameLabel = Instance.new("TextLabel", bb)
@@ -123,14 +131,13 @@ local function applyPlayerESP(p)
         nameLabel.Size = UDim2.new(1, 0, 0.5, 0)
         nameLabel.Font = Enum.Font.GothamBold
         nameLabel.TextSize = 14
-        nameLabel.TextStrokeTransparency = 0
         nameLabel.RichText = true
 
         local healthBack = Instance.new("Frame", bb)
         healthBack.Name = "HealthBack"
         healthBack.Size = UDim2.new(0.5, 0, 0, 5)
         healthBack.Position = UDim2.new(0.25, 0, 0.6, 0)
-        healthBack.BackgroundColor3 = Color3.new(0, 0, 0)
+        healthBack.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
         healthBack.BorderSizePixel = 0
 
         local bar = Instance.new("Frame", healthBack)
@@ -140,38 +147,33 @@ local function applyPlayerESP(p)
 
     bb.Enabled = State.PlayersEnabled
 
+    -- режим ника
+    if State.NamesMode == "Egor" then
+        bb.Size = UDim2.new(8, 0, 2, 0)
+    else
+        bb.Size = UDim2.new(0, 200, 0, 40)
+    end
+
     local nameLabel = bb:FindFirstChild("NameLabel")
     local healthBack = bb:FindFirstChild("HealthBack")
     local bar = healthBack and healthBack:FindFirstChild("Bar")
 
     if nameLabel then
         nameLabel.Visible = State.ShowNames
+        if State.NamesMode == "Egor" then
+            nameLabel.TextStrokeTransparency = 1
+        else
+            nameLabel.TextStrokeTransparency = 0
+        end
         if State.ShowNames then
             local dist = math.floor((workspace.CurrentCamera.CFrame.Position - head.Position).Magnitude)
             local teamHex = teamColor:ToHex()
             nameLabel.Text = string.format('<font color="#%s">%s</font> <font color="#FFFFFF">| %dm</font>', teamHex, p.DisplayName, dist)
         end
-        if State.NamesMode == "Egor" then
-            -- размер в Studs — масштабируется с расстоянием (дальше = меньше)
-            nameLabel.TextStrokeTransparency = 1
-            bb.Size = UDim2.new(8, 0, 2, 0)
-        else
-            -- фиксированный размер на экране
-            nameLabel.TextStrokeTransparency = 0
-            bb.Size = UDim2.new(0, 200, 0, 40)
-        end
     end
 
     if healthBack then
         healthBack.Visible = State.ShowHealth
-        -- Egor режим для HP: фиксированный размер
-        if State.HealthMode == "Egor" then
-            healthBack.Size = UDim2.new(0.5, 0, 0, 5)
-            healthBack.MaxDistance = 100
-        else
-            healthBack.Size = UDim2.new(0.5, 0, 0, 5)
-            healthBack.MaxDistance = 0
-        end
         if bar and State.ShowHealth then
             local ratio = math.clamp(hum.Health / hum.MaxHealth, 0, 1)
             bar.Size = UDim2.new(ratio, 0, 1, 0)
@@ -179,7 +181,7 @@ local function applyPlayerESP(p)
         end
     end
 
-    playerESPCache[p] = {hl = hl, bb = bb}
+    playerESPCache[p] = {hl = hl, bb = bb, namesMode = State.NamesMode}
 end
 
 local function removePlayerESP(p)
