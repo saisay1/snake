@@ -10,7 +10,8 @@ local State = {
     PlayersEnabled = true,
     ShowNames = true,
     ShowHealth = true,
-    ShowEgorNames = false,
+    NamesMode = "Default",
+    HealthMode = "Default",
 
     BeesEnabled = true,
     BeehiveEnabled = true,
@@ -150,10 +151,27 @@ local function applyPlayerESP(p)
             local teamHex = teamColor:ToHex()
             nameLabel.Text = string.format('<font color="#%s">%s</font> <font color="#FFFFFF">| %dm</font>', teamHex, p.DisplayName, dist)
         end
+        if State.NamesMode == "Egor" then
+            -- размер в Studs — масштабируется с расстоянием (дальше = меньше)
+            nameLabel.TextStrokeTransparency = 1
+            bb.Size = UDim2.new(8, 0, 2, 0)
+        else
+            -- фиксированный размер на экране
+            nameLabel.TextStrokeTransparency = 0
+            bb.Size = UDim2.new(0, 200, 0, 40)
+        end
     end
 
     if healthBack then
         healthBack.Visible = State.ShowHealth
+        -- Egor режим для HP: фиксированный размер
+        if State.HealthMode == "Egor" then
+            healthBack.Size = UDim2.new(0.5, 0, 0, 5)
+            healthBack.MaxDistance = 100
+        else
+            healthBack.Size = UDim2.new(0.5, 0, 0, 5)
+            healthBack.MaxDistance = 0
+        end
         if bar and State.ShowHealth then
             local ratio = math.clamp(hum.Health / hum.MaxHealth, 0, 1)
             bar.Size = UDim2.new(ratio, 0, 1, 0)
@@ -161,40 +179,7 @@ local function applyPlayerESP(p)
         end
     end
 
-    -- Egor billboard (фиксированный размер)
-    local eb
-    if cache and cache.eb and cache.eb.Parent == head then
-        eb = cache.eb
-    else
-        eb = Instance.new("BillboardGui", head)
-        eb.Name = "SaiEgorTag"
-        eb.AlwaysOnTop = true
-        eb.StudsOffset = Vector3.new(0, 3, 0)
-        eb.Size = UDim2.new(0, 0, 0, 0)
-        eb.SizeOffset = Vector2.new(5, 1.5)
-
-        local egorLabel = Instance.new("TextLabel", eb)
-        egorLabel.Name = "EgorLabel"
-        egorLabel.BackgroundTransparency = 1
-        egorLabel.Size = UDim2.new(1, 0, 1, 0)
-        egorLabel.Font = Enum.Font.GothamBold
-        egorLabel.TextSize = 14
-        egorLabel.TextStrokeTransparency = 0
-        egorLabel.RichText = true
-    end
-
-    eb.Enabled = State.ShowEgorNames
-
-    local egorLabel = eb:FindFirstChild("EgorLabel")
-    if egorLabel then
-        if State.ShowEgorNames then
-            local dist = math.floor((workspace.CurrentCamera.CFrame.Position - head.Position).Magnitude)
-            local teamHex = teamColor:ToHex()
-            egorLabel.Text = string.format('<font color="#%s">%s</font> <font color="#FFFFFF">| %dm</font>', teamHex, p.DisplayName, dist)
-        end
-    end
-
-    playerESPCache[p] = {hl = hl, bb = bb, eb = eb}
+    playerESPCache[p] = {hl = hl, bb = bb}
 end
 
 local function removePlayerESP(p)
@@ -202,7 +187,6 @@ local function removePlayerESP(p)
     if cache then
         if cache.hl and cache.hl.Parent then cache.hl:Destroy() end
         if cache.bb and cache.bb.Parent then cache.bb:Destroy() end
-        if cache.eb and cache.eb.Parent then cache.eb:Destroy() end
         playerESPCache[p] = nil
     end
 end
@@ -349,6 +333,7 @@ end
 local BoxBtn = createMenuBtn("BOX MODE", UDim2.new(0, 5, 0, 6))
 local HLBtn  = createMenuBtn("HIGHLIGHT", UDim2.new(0, 5, 0, 37))
 local currentSetKey = nil
+local currentSetType = "esp"
 
 local function onModeChange()
     SettingsPanel.Visible = false
@@ -356,10 +341,24 @@ local function onModeChange()
 end
 
 BoxBtn.MouseButton1Click:Connect(function()
-    if currentSetKey then State[currentSetKey] = "Box"; onModeChange() end
+    if not currentSetKey then return end
+    if currentSetType == "player" then
+        State[currentSetKey] = "Default"
+        SettingsPanel.Visible = false
+    else
+        State[currentSetKey] = "Box"
+        onModeChange()
+    end
 end)
 HLBtn.MouseButton1Click:Connect(function()
-    if currentSetKey then State[currentSetKey] = "Highlight"; onModeChange() end
+    if not currentSetKey then return end
+    if currentSetType == "player" then
+        State[currentSetKey] = "Egor"
+        SettingsPanel.Visible = false
+    else
+        State[currentSetKey] = "Highlight"
+        onModeChange()
+    end
 end)
 
 local TopBar = Instance.new("Frame", MainFrame)
@@ -413,6 +412,15 @@ local function addToggle(text, stateKey, modeKey)
         Instance.new("UICorner", opt)
         opt.MouseButton1Click:Connect(function()
             currentSetKey = modeKey
+            if modeKey == "NamesMode" or modeKey == "HealthMode" then
+                currentSetType = "player"
+                BoxBtn.Text = "DEFAULT"
+                HLBtn.Text = "EGOR"
+            else
+                currentSetType = "esp"
+                BoxBtn.Text = "BOX MODE"
+                HLBtn.Text = "HIGHLIGHT"
+            end
             SettingsPanel.Position = UDim2.new(0, opt.AbsolutePosition.X - 115, 0, opt.AbsolutePosition.Y)
             SettingsPanel.Visible = not SettingsPanel.Visible
         end)
@@ -454,9 +462,8 @@ local function SwitchTab(name)
     end
     if name == "Player" then
         addToggle("Enable ESP", "PlayersEnabled")
-        addToggle("Names & Distance", "ShowNames")
-        addToggle("Egor Name | m", "ShowEgorNames")
-        addToggle("Health Bar", "ShowHealth")
+        addToggle("Names & Distance", "ShowNames", "NamesMode")
+        addToggle("Health Bar", "ShowHealth", "HealthMode")
     else
         for _, t in pairs(CustomTargets) do
             if t.Tab == name:upper() then
