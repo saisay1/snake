@@ -10,6 +10,7 @@ local State = {
     PlayersEnabled = true,
     ShowNames = true,
     ShowHealth = true,
+    ShowEgorNames = false,
 
     BeesEnabled = true,
     BeehiveEnabled = true,
@@ -160,7 +161,40 @@ local function applyPlayerESP(p)
         end
     end
 
-    playerESPCache[p] = {hl = hl, bb = bb}
+    -- Egor billboard (фиксированный размер)
+    local eb
+    if cache and cache.eb and cache.eb.Parent == head then
+        eb = cache.eb
+    else
+        eb = Instance.new("BillboardGui", head)
+        eb.Name = "SaiEgorTag"
+        eb.AlwaysOnTop = true
+        eb.StudsOffset = Vector3.new(0, 3, 0)
+        eb.Size = UDim2.new(0, 0, 0, 0)
+        eb.SizeOffset = Vector2.new(5, 1.5)
+
+        local egorLabel = Instance.new("TextLabel", eb)
+        egorLabel.Name = "EgorLabel"
+        egorLabel.BackgroundTransparency = 1
+        egorLabel.Size = UDim2.new(1, 0, 1, 0)
+        egorLabel.Font = Enum.Font.GothamBold
+        egorLabel.TextSize = 14
+        egorLabel.TextStrokeTransparency = 0
+        egorLabel.RichText = true
+    end
+
+    eb.Enabled = State.ShowEgorNames
+
+    local egorLabel = eb:FindFirstChild("EgorLabel")
+    if egorLabel then
+        if State.ShowEgorNames then
+            local dist = math.floor((workspace.CurrentCamera.CFrame.Position - head.Position).Magnitude)
+            local teamHex = teamColor:ToHex()
+            egorLabel.Text = string.format('<font color="#%s">%s</font> <font color="#FFFFFF">| %dm</font>', teamHex, p.DisplayName, dist)
+        end
+    end
+
+    playerESPCache[p] = {hl = hl, bb = bb, eb = eb}
 end
 
 local function removePlayerESP(p)
@@ -168,6 +202,7 @@ local function removePlayerESP(p)
     if cache then
         if cache.hl and cache.hl.Parent then cache.hl:Destroy() end
         if cache.bb and cache.bb.Parent then cache.bb:Destroy() end
+        if cache.eb and cache.eb.Parent then cache.eb:Destroy() end
         playerESPCache[p] = nil
     end
 end
@@ -420,6 +455,7 @@ local function SwitchTab(name)
     if name == "Player" then
         addToggle("Enable ESP", "PlayersEnabled")
         addToggle("Names & Distance", "ShowNames")
+        addToggle("Egor Name | m", "ShowEgorNames")
         addToggle("Health Bar", "ShowHealth")
     else
         for _, t in pairs(CustomTargets) do
