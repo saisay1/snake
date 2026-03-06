@@ -67,7 +67,7 @@ local CustomTargets = {
     {Name = "thorn",      Color = Color3.fromRGB(100, 200, 80),  Tab = "ALCHEMIST",    Text = "Show Thorns",     StateKey = "ThornsEnabled",    ModeKey = "ThornsMode"},
     {Name = "gravestone",       Color = Color3.fromRGB(180, 180, 180), Tab = "CRYPT",     Text = "Show Gravestone", StateKey = "GravestoneEnabled", ModeKey = "GravestoneMode"},
     {Name = "chicken_egg_block",Color = Color3.fromRGB(255, 220, 100), Tab = "EGG",       Text = "Show Egg",        StateKey = "EggEnabled",        ModeKey = "EggMode"},
-    {Name = "2",                Color = Color3.fromRGB(180, 100, 255), Tab = "DEATH ADDER", Text = "Show Crystal",    StateKey = "MaskEnabled",       ModeKey = "MaskMode"},
+    {Name = "AlchemyCrystal.2", Color = Color3.fromRGB(180, 100, 255), Tab = "DEATH ADDER", Text = "Show Crystal",    StateKey = "MaskEnabled",       ModeKey = "MaskMode"},
 }
 
 local ESP_FOLDER = workspace:FindFirstChild("Global_ESP_Storage") or Instance.new("Folder", workspace)
