@@ -368,6 +368,7 @@ FunctionScroll.CanvasSize = UDim2.new(0, 0, 2.5, 0); FunctionScroll.ScrollBarThi
 Instance.new("UIListLayout", FunctionScroll).Padding = UDim.new(0, 8)
 
 local updateAllIndicators -- forward declaration
+local updateIndicator -- forward declaration
 
 local function addToggle(text, stateKey, modeKey)
     local frame = Instance.new("Frame", FunctionScroll)
@@ -415,12 +416,16 @@ local function addToggle(text, stateKey, modeKey)
         State[stateKey] = not State[stateKey]
         update()
         updateAllIndicators()
+        updateIndicator(currentTab)
         refreshObjects()
     end)
     update()
 end
 
+local currentTab = "Player"
+
 local function SwitchTab(name)
+    currentTab = name
     TabNameLabel.Text = "  " .. name:upper()
     SettingsPanel.Visible = false
     for _, v in pairs(FunctionScroll:GetChildren()) do
