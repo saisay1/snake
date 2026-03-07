@@ -50,7 +50,7 @@ local State = {
     GravestoneMode = "Highlight",
 
     PlayerFillTrans = 0.7,
-    PartFillTrans = 0.4,
+    PartFillTrans = 0.3,
 }
 
 local CustomTargets = {
@@ -412,6 +412,7 @@ local function addToggle(text, stateKey, modeKey)
     bg.MouseButton1Click:Connect(function()
         State[stateKey] = not State[stateKey]
         update()
+        updateAllIndicators()
         refreshObjects()
     end)
     update()
@@ -436,11 +437,100 @@ local function SwitchTab(name)
     end
 end
 
+-- Маппинг таба -> список StateKey
+local tabStateKeys = {
+    Player       = {"PlayersEnabled", "ShowNames", "ShowHealth"},
+    Beds         = {"BedEnabled"},
+    Beekeeper    = {"BeesEnabled", "BeehiveEnabled"},
+    Resources    = {"UrnEnabled", "IronEnabled", "DiamondEnabled", "EmeraldEnabled"},
+    ["Farmer Fruit"] = {"MelonEnabled"},
+    Alchemist    = {"FlowerEnabled", "MushroomsEnabled", "ThornsEnabled"},
+    Egg          = {"EggEnabled"},
+    Crypt        = {"GravestoneEnabled"},
+    ["Death Adder"] = {"MaskEnabled"},
+}
+
+local tabIndicators = {}
+
+local function getTabStatus(tabName)
+    local keys = tabStateKeys[tabName]
+    if not keys then return "green" end
+    local allOn, allOff = true, true
+    for _, k in ipairs(keys) do
+        if State[k] then allOff = false else allOn = false end
+    end
+    if allOn then return "green"
+    elseif allOff then return "red"
+    else return "yellow" end
+end
+
+local function updateIndicator(tabName)
+    local dot = tabIndicators[tabName]
+    if not dot then return end
+    local status = getTabStatus(tabName)
+    if status == "green" then
+        dot.BackgroundColor3 = Color3.fromRGB(0, 220, 80)
+    elseif status == "red" then
+        dot.BackgroundColor3 = Color3.fromRGB(220, 50, 50)
+    else
+        dot.BackgroundColor3 = Color3.fromRGB(255, 200, 0)
+    end
+end
+
+-- обновляем все индикаторы (вызывать после смены State)
+local function updateAllIndicators()
+    for tabName, _ in pairs(tabStateKeys) do
+        updateIndicator(tabName)
+    end
+end
+
 local function addCircle(color, emoji, tabName)
     local btn = Instance.new("TextButton", TabScroll)
-    btn.Size = UDim2.new(0, 42, 0, 42); btn.BackgroundColor3 = color
-    btn.Text = emoji; btn.TextSize = 20
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(1, 0)
+    btn.Size = UDim2.new(0, 42, 0, 42)
+    btn.BackgroundColor3 = color
+    btn.Text = emoji
+    btn.TextSize = 20
+    local corner = Instance.new("UICorner", btn)
+    corner.CornerRadius = UDim.new(1, 0)
+    -- серая обводка
+    local stroke = Instance.new("UIStroke", btn)
+    stroke.Color = Color3.fromRGB(120, 120, 120)
+    stroke.Thickness = 1.5
+
+    -- индикатор сверху по центру
+    local dot = Instance.new("TextButton", btn)
+    dot.Size = UDim2.new(0, 12, 0, 12)
+    dot.Position = UDim2.new(0.5, -6, 0, -4)
+    dot.BackgroundColor3 = Color3.fromRGB(0, 220, 80)
+    dot.Text = ""
+    dot.ZIndex = 10
+    dot.BorderSizePixel = 0
+    local dotCorner = Instance.new("UICorner", dot)
+    dotCorner.CornerRadius = UDim.new(1, 0)
+    local dotStroke = Instance.new("UIStroke", dot)
+    dotStroke.Color = Color3.fromRGB(80, 80, 80)
+    dotStroke.Thickness = 1
+
+    tabIndicators[tabName] = dot
+
+    -- клик по индикатору
+    dot.MouseButton1Click:Connect(function()
+        local keys = tabStateKeys[tabName]
+        if not keys then return end
+        local status = getTabStatus(tabName)
+        if status == "green" or status == "yellow" then
+            -- выключаем все
+            for _, k in ipairs(keys) do State[k] = false end
+        else
+            -- включаем все
+            for _, k in ipairs(keys) do State[k] = true end
+        end
+        updateAllIndicators()
+        -- обновляем UI если сейчас открыта эта вкладка
+        SwitchTab(tabName)
+        refreshObjects()
+    end)
+
     btn.MouseButton1Click:Connect(function() SwitchTab(tabName) end)
 end
 
@@ -454,6 +544,7 @@ addCircle(Color3.fromRGB(139, 90, 43),  "🥚", "Egg")
 addCircle(Color3.fromRGB(255, 255, 255),"💀", "Crypt")
 addCircle(Color3.fromRGB(128, 0, 200),  "🎭", "Death Adder")
 SwitchTab("Player")
+updateAllIndicators()
 
 -- ================= ДРАГ =================
 
