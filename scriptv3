@@ -367,8 +367,52 @@ FunctionScroll.BackgroundTransparency = 1; FunctionScroll.BorderSizePixel = 0
 FunctionScroll.CanvasSize = UDim2.new(0, 0, 2.5, 0); FunctionScroll.ScrollBarThickness = 3
 Instance.new("UIListLayout", FunctionScroll).Padding = UDim.new(0, 8)
 
-local updateAllIndicators -- forward declaration
-local updateIndicator -- forward declaration
+-- Маппинг таба -> список StateKey
+local tabStateKeys = {
+    Player       = {"PlayersEnabled", "ShowNames", "ShowHealth"},
+    Beds         = {"BedEnabled"},
+    Beekeeper    = {"BeesEnabled", "BeehiveEnabled"},
+    Resources    = {"UrnEnabled", "IronEnabled", "DiamondEnabled", "EmeraldEnabled"},
+    ["Farmer Fruit"] = {"MelonEnabled"},
+    Alchemist    = {"FlowerEnabled", "MushroomsEnabled", "ThornsEnabled"},
+    Egg          = {"EggEnabled"},
+    Crypt        = {"GravestoneEnabled"},
+    ["Death Adder"] = {"MaskEnabled"},
+}
+
+local tabIndicators = {}
+local currentTab = "Player"
+
+local function getTabStatus(tabName)
+    local keys = tabStateKeys[tabName]
+    if not keys then return "green" end
+    local allOn, allOff = true, true
+    for _, k in ipairs(keys) do
+        if State[k] then allOff = false else allOn = false end
+    end
+    if allOn then return "green"
+    elseif allOff then return "red"
+    else return "yellow" end
+end
+
+local function updateIndicator(tabName)
+    local dot = tabIndicators[tabName]
+    if not dot then return end
+    local status = getTabStatus(tabName)
+    if status == "green" then
+        dot.BackgroundColor3 = Color3.fromRGB(0, 220, 80)
+    elseif status == "red" then
+        dot.BackgroundColor3 = Color3.fromRGB(220, 50, 50)
+    else
+        dot.BackgroundColor3 = Color3.fromRGB(255, 200, 0)
+    end
+end
+
+local function updateAllIndicators()
+    for tabName, _ in pairs(tabStateKeys) do
+        updateIndicator(tabName)
+    end
+end
 
 local function addToggle(text, stateKey, modeKey)
     local frame = Instance.new("Frame", FunctionScroll)
@@ -415,14 +459,11 @@ local function addToggle(text, stateKey, modeKey)
     bg.MouseButton1Click:Connect(function()
         State[stateKey] = not State[stateKey]
         update()
-        updateAllIndicators()
-        updateIndicator(currentTab)
         refreshObjects()
+        task.defer(updateAllIndicators)
     end)
     update()
 end
-
-local currentTab = "Player"
 
 local function SwitchTab(name)
     currentTab = name
@@ -441,53 +482,6 @@ local function SwitchTab(name)
                 addToggle(t.Text, t.StateKey, t.ModeKey)
             end
         end
-    end
-end
-
--- Маппинг таба -> список StateKey
-local tabStateKeys = {
-    Player       = {"PlayersEnabled", "ShowNames", "ShowHealth"},
-    Beds         = {"BedEnabled"},
-    Beekeeper    = {"BeesEnabled", "BeehiveEnabled"},
-    Resources    = {"UrnEnabled", "IronEnabled", "DiamondEnabled", "EmeraldEnabled"},
-    ["Farmer Fruit"] = {"MelonEnabled"},
-    Alchemist    = {"FlowerEnabled", "MushroomsEnabled", "ThornsEnabled"},
-    Egg          = {"EggEnabled"},
-    Crypt        = {"GravestoneEnabled"},
-    ["Death Adder"] = {"MaskEnabled"},
-}
-
-local tabIndicators = {}
-
-local function getTabStatus(tabName)
-    local keys = tabStateKeys[tabName]
-    if not keys then return "green" end
-    local allOn, allOff = true, true
-    for _, k in ipairs(keys) do
-        if State[k] then allOff = false else allOn = false end
-    end
-    if allOn then return "green"
-    elseif allOff then return "red"
-    else return "yellow" end
-end
-
-local function updateIndicator(tabName)
-    local dot = tabIndicators[tabName]
-    if not dot then return end
-    local status = getTabStatus(tabName)
-    if status == "green" then
-        dot.BackgroundColor3 = Color3.fromRGB(0, 220, 80)
-    elseif status == "red" then
-        dot.BackgroundColor3 = Color3.fromRGB(220, 50, 50)
-    else
-        dot.BackgroundColor3 = Color3.fromRGB(255, 200, 0)
-    end
-end
-
--- обновляем все индикаторы (вызывать после смены State)
-local function updateAllIndicators()
-    for tabName, _ in pairs(tabStateKeys) do
-        updateIndicator(tabName)
     end
 end
 
