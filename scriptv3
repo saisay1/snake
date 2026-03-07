@@ -367,6 +367,8 @@ FunctionScroll.BackgroundTransparency = 1; FunctionScroll.BorderSizePixel = 0
 FunctionScroll.CanvasSize = UDim2.new(0, 0, 2.5, 0); FunctionScroll.ScrollBarThickness = 3
 Instance.new("UIListLayout", FunctionScroll).Padding = UDim.new(0, 8)
 
+local updateAllIndicators -- forward declaration
+
 local function addToggle(text, stateKey, modeKey)
     local frame = Instance.new("Frame", FunctionScroll)
     frame.Size = UDim2.new(1, -10, 0, 32); frame.BackgroundTransparency = 1
